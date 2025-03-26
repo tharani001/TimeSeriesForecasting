@@ -112,3 +112,36 @@ def ARIMA_gridsearch(endog, min_p, max_p, min_q, max_q, d):
     
     return result_df
 
+def SARIMAX_gridsearch(endog, exog, min_p, max_p, min_q, max_q, min_P, max_P, min_Q, max_Q, d, D, s):
+    
+    all_p = range(min_p, max_p+1, 1)
+    all_q = range(min_q, max_q+1, 1)
+    all_P = range(min_P, max_P+1, 1)
+    all_Q = range(min_Q, max_Q+1, 1)
+    
+    all_orders = list(product(all_p, all_q, all_P, all_Q))
+    
+    print(f'Fitting {len(all_orders)} unique models')
+    
+    results = []
+    
+    for order in tqdm_notebook(all_orders):
+        try: 
+            model = SARIMAX(
+                endog,
+                exog,
+                order=(order[0], d, order[1]),
+                seasonal_order=(order[2], D, order[3], s),
+                simple_differencing=False).fit(disp=False)
+        except:
+            continue
+            
+        results.append([order, model.aic])
+        
+    result_df = pd.DataFrame(results)
+    result_df.columns = ['(p,q,P,Q)', 'AIC']
+    
+    #Sort in ascending order, lower AIC is better
+    result_df = result_df.sort_values(by='AIC', ascending=True).reset_index(drop=True)
+    
+    return result_df
