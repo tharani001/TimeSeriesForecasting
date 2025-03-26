@@ -66,22 +66,22 @@ def rolling_predictions(df, train_len, horizon, window, period, method):
 
 def ljung_box_test(residuals, is_seasonal, period):
 
-if is_seasonal:
-    lb_df = acorr_ljungbox(residuals, period=period)
-else:
-    max_lag = min([10, len(residuals)/5])
-    
-    lb_df = acorr_ljungbox(residuals, np.arange(1, max_lag+1, 1))
+    if is_seasonal:
+        lb_df = acorr_ljungbox(residuals, period=period)
+    else:
+        max_lag = min([10, len(residuals)/5])
+        
+        lb_df = acorr_ljungbox(residuals, np.arange(1, max_lag+1, 1))
 
-fig, ax = plt.subplots()
-ax.plot(lb_df['lb_pvalue'], 'b-', label='p-values')
-ax.hlines(y=0.05, xmin=1, xmax=len(lb_df), color='black')
-plt.tight_layout()
+    fig, ax = plt.subplots()
+    ax.plot(lb_df['lb_pvalue'], 'b-', label='p-values')
+    ax.hlines(y=0.05, xmin=1, xmax=len(lb_df), color='black')
+    plt.tight_layout()
 
-if all(pvalue > 0.05 for pvalue in lb_df['lb_pvalue']):
-    print('All values are above 0.05. We fail to reject the null hypothesis. The residuals are uncorrelated')
-else:
-    print('One p-value is smaller than 0.05')
+    if all(pvalue > 0.05 for pvalue in lb_df['lb_pvalue']):
+        print('All values are above 0.05. We fail to reject the null hypothesis. The residuals are uncorrelated')
+    else:
+        print('One p-value is smaller than 0.05')
 
 
 
